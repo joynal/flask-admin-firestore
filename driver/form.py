@@ -1,7 +1,7 @@
 from wtforms import fields, validators
 
 from flask_admin import form
-from flask_admin.model.form import FieldPlaceholder
+from flask_admin.model.form import FieldPlaceholder, ModelConverterBase
 from flask_admin.model.fields import InlineFieldList, AjaxSelectField, AjaxSelectMultipleField
 from flask_admin.form.validators import FieldListInputRequired
 from flask_admin._compat import iteritems
@@ -10,7 +10,7 @@ from .fields import ModelFormField
 from .subdoc import EmbeddedForm
 
 
-class CustomModelConverter(orm.ModelConverter):
+class CustomModelConverter(ModelConverterBase):
     """
         Customized MongoEngine form conversion class.
 
@@ -104,7 +104,7 @@ class CustomModelConverter(orm.ModelConverter):
     @orm.converts('DateTimeField')
     def conv_DateTime(self, model, field, kwargs):
         kwargs['widget'] = form.DateTimePickerWidget()
-        return orm.ModelConverter.conv_DateTime(self, model, field, kwargs)
+        return ModelConverterBase.conv_DateTime(self, model, field, kwargs)
 
     @orm.converts('ListField')
     def conv_List(self, model, field, kwargs):
@@ -167,7 +167,7 @@ class CustomModelConverter(orm.ModelConverter):
 
         kwargs['widget'] = form.Select2Widget()
 
-        return orm.ModelConverter.conv_Reference(self, model, field, kwargs)
+        return ModelConverterBase.conv_Reference(self, model, field, kwargs)
 
 
 def get_form(model, converter,

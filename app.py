@@ -7,31 +7,35 @@ from firebase_admin import firestore
 from wtforms import form, fields
 
 from flask_admin.form import Select2Widget
+from driver.view import ModelView
 from flask_admin.model.fields import InlineFormField, InlineFieldList
 
 # Create application
 app = Flask(__name__)
 
 # Create dummy secrey key so we can use sessions
-app.config['SECRET_KEY'] = '123456790'
+app.config["SECRET_KEY"] = "123456790"
 
-cred = credentials.Certificate('/Users/joynal/.gcloud/kamata-dev.json')
-firebase_admin.initialize_app(cred, {
-  'projectId': 'kamata-dev',
-})
+cred = credentials.Certificate("/Users/joynal/.gcloud/kamata-dev.json")
+firebase_admin.initialize_app(
+    cred,
+    {
+        "projectId": "kamata-dev",
+    },
+)
 
 db = firestore.client()
 
 
 class InnerForm(form.Form):
-    name = fields.StringField('Name')
-    test = fields.StringField('Test')
+    name = fields.StringField("Name")
+    test = fields.StringField("Test")
 
 
 class UserForm(form.Form):
-    name = fields.StringField('Name')
-    email = fields.StringField('Email')
-    password = fields.StringField('Password')
+    name = fields.StringField("Name")
+    email = fields.StringField("Email")
+    password = fields.StringField("Password")
 
     # Inner form
     inner = InlineFormField(InnerForm)
@@ -41,18 +45,18 @@ class UserForm(form.Form):
 
 
 class AgentForm(form.Form):
-    name = fields.StringField('Name')
-    user_id = fields.SelectField('User', widget=Select2Widget())
-    text = fields.StringField('Text')
+    name = fields.StringField("Name")
+    user_id = fields.SelectField("User", widget=Select2Widget())
+    text = fields.StringField("Text")
 
-    testie = fields.BooleanField('Test')
+    testie = fields.BooleanField("Test")
 
 
-class AgentView(admin.BaseView):
-    column_list = ('name', 'user_name', 'text')
-    column_sortable_list = ('name', 'text')
+class AgentView(ModelView):
+    column_list = ("name", "user_name", "text")
+    column_sortable_list = ("name", "text")
 
-    column_searchable_list = ('name', 'text')
+    column_searchable_list = ("name", "text")
 
     form = AgentForm
 
@@ -62,10 +66,7 @@ class AgentView(admin.BaseView):
         # TODO: fix me
         count = 10000
         coll = (
-            db.collection("deo")
-            .document("entities")
-            .collection("agents")
-            .limit(10)
+            db.limit(10)
             .offset(0)
             .order_by("created_at", "DESCENDING")
             .get()
@@ -77,8 +78,8 @@ class AgentView(admin.BaseView):
 
     # Contribute list of user choices to the forms
     def _feed_user_choices(self, form):
-        users = db.user.find(fields=('name',))
-        form.user_id.choices = [(str(x['_id']), x['name']) for x in users]
+        users = db.user.find(fields=("name",))
+        form.user_id.choices = [(str(x["_id"]), x["name"]) for x in users]
         return form
 
     def create_form(self):
@@ -91,24 +92,25 @@ class AgentView(admin.BaseView):
 
     # Correct user_id reference before saving
     def on_model_change(self, form, model):
-        user_id = model.get('user_id')
+        user_id = model.get("user_id")
         # model['user_id'] = ObjectId(user_id)
 
         return model
 
 
 # Flask views
-@app.route('/')
+@app.route("/")
 def index():
     return '<a href="/admin/">Click me to get to Admin!</a>'
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Create admin
-    admin = admin.Admin(app, name='Firestore')
+    admin = admin.Admin(app, name="Firestore")
 
     # Add views
-    admin.add_view(AgentView(name="Agents", category='Agents'))
+    agent = db.collection("demo").document("entities").collection("agents")
+    admin.add_view(AgentView(agent, "Agents"))
 
     # Start app
     app.run(debug=True)

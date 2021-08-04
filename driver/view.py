@@ -223,13 +223,7 @@ class ModelView(BaseModelView):
                                         menu_icon_type=menu_icon_type,
                                         menu_icon_value=menu_icon_value)
 
-        self._primary_key = self.scaffold_pk()
-
-        firebase_admin.initialize_app(
-            credentials.Certificate(GOOGLE_KEY_FILE),
-        )
-
-        self.db = firestore.client()
+        self.db = model
 
 
     def _refresh_cache(self):
@@ -453,48 +447,16 @@ class ModelView(BaseModelView):
                 overriden to change the page_size limit. Removing the page_size
                 limit requires setting page_size to 0 or False.
         """
-        query = self.db.collection(db_name)
-            .document("entities")
-            .collection(coll_name)
-
-        # Filters
-        if self._filters:
-            for flt, flt_name, value in filters:
-                f = self._filters[flt]
-                query = f.apply(query, f.clean(value))
-
-        # Search
-        if self._search_supported and search:
-            query = self._search(query, search)
-
-        # Get count
-        count = query.count() if not self.simple_list_pager else None
-
-        # Sorting
-        if sort_column:
-            query = query.order_by('%s%s' % ('-' if sort_desc else '', sort_column))
-        else:
-            order = self._get_default_order()
-
-            if order:
-                keys = ['%s%s' % ('-' if desc else '', col)
-                        for (col, desc) in order]
-                query = query.order_by(*keys)
-
-        # Pagination
-        if page_size is None:
-            page_size = self.page_size
-
-        if page_size:
-            query = query.limit(page_size)
-
-        if page and page_size:
-            query = query.offset(page * page_size)
-
-        if execute:
-            query = query
-            .order_by("created_at", order)
+        # TODO: fix me
+        count = 10000
+        query = (
+            self.db
+            .limit(10)
+            .offset(0)
+            .order_by("created_at", "DESCENDING")
             .get()
+        )
+
 
         return count, query
 
