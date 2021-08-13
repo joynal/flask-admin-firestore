@@ -10,7 +10,7 @@ firebase_admin.initialize_app(cred, {
 
 db = firestore.client()
 
-# test_coll = db.collection('demo').document('entities').collection('orders')
+test_coll = db.collection('demo').document('entities').collection('orders')
 
 # create new user
 # new_user = test_coll.document()
@@ -30,9 +30,9 @@ db = firestore.client()
 # user = test_coll.document('EjnCMVEhGQF2HwNtISw4').delete()
 
 # read documents
-# docs = test_coll.stream()
-# for doc in docs:
-#     print(f'{doc.id} => {doc.to_dict()}')
+docs = test_coll.stream()
+for doc in docs:
+    print(f'{doc.id} => {doc.to_dict()}')
 
 # read nested collections
 # nested_collections = db.collection('demo').document('entities').collections()
@@ -43,9 +43,9 @@ db = firestore.client()
     #     print(f'{doc.id} => {doc.to_dict()}')
 
 
-nested_collections = db.collections()
+# nested_collections = db.collections()
 
-for collection in nested_collections:
-    print('collection => ', collection.id)
-    for doc in collection.stream():
-        print(f'{doc.id} => {doc.to_dict()}')
+# for collection in nested_collections:
+#     print('collection => ', collection.id)
+#     for doc in collection.stream():
+#         print(f'{doc.id} => {doc.to_dict()}')
